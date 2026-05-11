@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel — Kancelaria Kowalski</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e2d;--navy2:#1a2f42;--gold:#c9a84c;--gold2:#e8c96a;
+  --cream:#f7f3ec;--bg:#f0ebe2;--white:#fff;
+  --text:#1a1a1a;--text2:#5a5450;--text3:#9a8f86;
+  --border:rgba(0,0,0,0.09);
+  --red:#c0392b;--red-bg:#fdf0ef;
+  --green:#1a7a4a;--green-bg:#edf7f1;
+  --amber:#8a6500;--amber-bg:#fff8e7;
+}
+body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;
+  background:var(--navy);
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(255,255,255,0.015) 40px,rgba(255,255,255,0.015) 41px)}
+.login-card{background:#fff;border-radius:6px;padding:2.5rem;width:100%;max-width:380px;border-top:3px solid var(--gold)}
+.login-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--text3);margin-bottom:2rem;letter-spacing:.04em}
+.login-lock{text-align:center;font-size:40px;margin-bottom:1.5rem;opacity:.15}
+
+/* TOPBAR */
+.topbar{background:var(--navy);padding:.875rem 2rem;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(201,168,76,.2);position:sticky;top:0;z-index:100}
+.topbar-brand{font-family:'Playfair Display',serif;color:#f0ebe0;font-size:15px;display:flex;align-items:center;gap:10px}
+.topbar-brand-icon{color:var(--gold);font-size:18px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-user{font-size:12px;color:rgba(240,235,224,.45);letter-spacing:.04em}
+
+/* LAYOUT */
+#app{display:none}
+.main{max-width:960px;margin:0 auto;padding:2rem;display:grid;gap:1.5rem}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:2rem}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.card-icon{width:32px;height:32px;background:var(--navy);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:15px;flex-shrink:0}
+.card-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--navy)}
+.card-subtitle{font-size:12px;color:var(--text3);margin-top:1px}
+
+/* FORM */
+.field{margin-bottom:1.25rem}
+.field label{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.field input[type=text],.field input[type=password],.field input[type=datetime-local],.field select{
+  width:100%;border:1px solid var(--border);border-radius:4px;padding:10px 13px;
+  font-size:14px;font-family:'Lato',sans-serif;background:#fff;color:var(--text);
+  outline:none;transition:border-color .15s}
+.field input:focus{border-color:var(--gold)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:560px){.field-row{grid-template-columns:1fr}}
+
+/* QUILL EDITOR */
+.editor-wrap{border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:border-color .15s}
+.editor-wrap:focus-within{border-color:var(--gold)}
+.ql-toolbar.ql-snow{border:none;border-bottom:1px solid var(--border);background:#fafaf8;padding:10px 12px}
+.ql-container.ql-snow{border:none;font-family:'Lato',sans-serif;font-size:14px;min-height:160px}
+.ql-editor{min-height:160px;padding:14px 16px;line-height:1.75;color:var(--text);word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap}
+.ql-editor.ql-blank::before{color:var(--text3);font-style:italic;font-size:14px}
+.ql-snow .ql-toolbar button:hover,.ql-snow .ql-toolbar button.ql-active{color:var(--gold)!important}
+.ql-snow .ql-toolbar button:hover .ql-stroke,.ql-snow .ql-toolbar button.ql-active .ql-stroke{stroke:var(--gold)!important}
+.ql-snow .ql-toolbar button:hover .ql-fill,.ql-snow .ql-toolbar button.ql-active .ql-fill{fill:var(--gold)!important}
+.ql-snow.ql-toolbar .ql-formats{margin-right:10px}
+.ql-editor img{max-width:100%;border-radius:4px;margin:4px 0}
+
+/* FILE UPLOAD ZONE */
+.file-zone{border:1.5px dashed var(--border);border-radius:4px;padding:1rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;position:relative}
+.file-zone:hover{border-color:var(--gold);background:#fffdf5}
+.file-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.file-zone-icon{font-size:22px;margin-bottom:4px;opacity:.4}
+.file-zone-text{font-size:12px;color:var(--text3)}
+.file-zone-name{font-size:12px;color:var(--navy);font-weight:700;margin-top:4px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:4px;
+  border:1px solid var(--border);background:transparent;color:var(--text);
+  font-size:13px;font-family:'Lato',sans-serif;font-weight:700;letter-spacing:.03em;cursor:pointer;transition:all .15s}
+.btn:hover{background:#f0ece5}
+.btn-primary{background:var(--navy);color:#f0ebe0;border-color:var(--navy)}
+.btn-primary:hover{background:var(--navy2)}
+.btn-gold{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.btn-gold:hover{background:var(--gold2);border-color:var(--gold2)}
+.btn-danger{color:var(--red);border-color:rgba(192,57,43,.25)}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-row{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem}
+
+/* NOTICES */
+.notice{padding:10px 14px;border-radius:4px;font-size:13px;margin-bottom:1rem;display:flex;align-items:flex-start;gap:8px}
+.notice-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.notice-err{background:var(--red-bg);color:var(--red);border-left:3px solid var(--red)}
+.notice-ok{background:var(--green-bg);color:var(--green);border-left:3px solid var(--green)}
+.notice-warn{background:var(--amber-bg);color:var(--amber);border-left:3px solid var(--gold)}
+
+/* POSTS LIST */
+.posts-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.posts-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--navy)}
+.posts-count{font-size:13px;color:var(--text3);font-weight:400;font-family:'Lato',sans-serif;margin-left:4px}
+.posts-list{display:flex;flex-direction:column;gap:.75rem}
+
+.post-item{background:var(--white);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:box-shadow .15s}
+.post-item:hover{box-shadow:0 3px 16px rgba(0,0,0,.07)}
+.post-item.expired{opacity:.6}
+
+.pi-top{display:grid;grid-template-columns:1fr auto;gap:1rem;padding:1.25rem 1.25rem .875rem;align-items:start}
+.pi-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--navy);margin-bottom:5px;line-height:1.35}
+.pi-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.pi-meta{font-size:11px;color:var(--text3);letter-spacing:.03em}
+.pi-preview{padding:0 1.25rem .875rem;font-size:13px;color:var(--text2);line-height:1.6;font-weight:300}
+.pi-preview img{max-height:60px;border-radius:3px;object-fit:cover}
+
+.pi-footer{background:#fafaf8;border-top:1px solid var(--border);padding:.875rem 1.25rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pi-footer label{font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.pi-expiry{font-size:12px!important;padding:6px 10px!important;border:1px solid var(--border)!important;border-radius:4px;font-family:'Lato',sans-serif;background:#fff;outline:none;flex:1;min-width:170px;max-width:220px}
+.pi-expiry:focus{border-color:var(--gold)!important}
+.pi-spacer{flex:1}
+
+.reorder-col{display:flex;flex-direction:column;gap:3px}
+.ord-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text3);transition:all .12s}
+.ord-btn:hover{background:#f0ece5;color:var(--navy)}
+.ord-btn:disabled{opacity:.2;cursor:default}
+
+/* BADGES */
+.badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:3px}
+.badge-ok{background:var(--green-bg);color:var(--green)}
+.badge-exp{background:var(--red-bg);color:var(--red)}
+.badge-expiry{background:var(--amber-bg);color:var(--amber)}
+
+.empty{text-align:center;padding:3rem;color:var(--text3);font-style:italic}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(240,235,224,.3);border-top-color:#f0ebe0;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#global-msg{min-height:0}
+</style>
+</head>
+<body>
+
+<div id="login-wrap" class="login-wrap">
+  <div class="login-card">
+    <div class="login-lock">🔐</div>
+    <div class="login-logo">Kancelaria Kowalski</div>
+    <div class="login-sub">Panel administracyjny — dostęp zastrzeżony</div>
+    <div id="login-err" class="notice notice-err" style="display:none"><span class="notice-icon">⚠</span><span id="login-err-text"></span></div>
+    <div class="field">
+      <label>Hasło dostępu</label>
+      <input type="password" id="pw" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn btn-primary" id="login-btn" style="width:100%;justify-content:center">Zaloguj się</button>
+    </div>
+    <div id="attempts-msg" style="margin-top:10px;font-size:11px;color:var(--text3);text-align:center"></div>
+  </div>
+</div>
+
+<div id="app">
+  <nav class="topbar">
+    <div class="topbar-brand">
+      <span class="topbar-brand-icon">⚖</span>
+      Panel administracyjny
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-user">Kancelaria Kowalski</span>
+      <button class="btn btn-sm" id="logout-btn" style="color:#f0ebe0;border-color:rgba(240,235,224,.2)">Wyloguj</button>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- DODAJ WPIS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">✦</div>
+        <div>
+          <div class="card-title">Dodaj nowy wpis</div>
+          <div class="card-subtitle">Wpis pojawi się na stronie publicznej natychmiast po zapisaniu</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tytuł wpisu *</label>
+        <input type="text" id="new-title" placeholder="Np. Zmiany w prawie pracy 2025…">
+      </div>
+
+      <div class="field">
+        <label>Treść wpisu * — możesz wstawiać zdjęcia przyciskiem 🖼 w pasku narzędzi</label>
+        <div class="editor-wrap">
+          <div id="quill-editor"></div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Załącznik PDF (opcjonalnie)</label>
+          <div class="file-zone" id="file-zone">
+            <input type="file" id="new-file" accept=".pdf">
+            <div class="file-zone-icon">📎</div>
+            <div class="file-zone-text">Kliknij lub przeciągnij plik PDF</div>
+            <div class="file-zone-name" id="file-name-display"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Data ważności (wpis zniknie automatycznie)</label>
+          <input type="datetime-local" id="new-expiry">
+        </div>
+      </div>
+      <div class="field">
+        <label>Link do wideo — YouTube lub Vimeo (opcjonalnie)</label>
+        <input type="text" id="new-video" placeholder="Np. https://www.youtube.com/watch?v=...">
+      </div>
+
+      <div id="add-err" class="notice notice-err" style="display:none"><span class="notice-icon">⚠</span><span id="add-err-text"></span></div>
+      <div id="add-ok" class="notice notice-ok" style="display:none"><span class="notice-icon">✓</span><span id="add-ok-text"></span></div>
+
+      <div class="btn-row">
+        <button class="btn btn-gold" id="add-btn">
+          <span>✦</span> Opublikuj wpis
+        </button>
+      </div>
+    </div>
+
+    <!-- LISTA WPISÓW -->
+    <div>
+      <div class="posts-header">
+        <div class="posts-title">Wszystkie wpisy <span class="posts-count" id="posts-count"></span></div>
+        <button class="btn btn-sm" id="refresh-btn">↻ Odśwież</button>
+      </div>
+      <div id="global-msg"></div>
+      <div class="posts-list" id="posts-list">
+        <div class="empty">Ładowanie…</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
+<script>
+const _sb = supabase.createClient(
+  'https://jnhnxthtfqmmnqdjmfag.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuaG54dGh0ZnFtbW5xZGptZmFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODIzMzYyMiwiZXhwIjoyMDkzODA5NjIyfQ.ooQ0zIjMAAGYDm6o4caAjo8PCxSSLZg6L0NOGv0GxGc',
+  { global: { headers: { 'X-Client-Info': 'kancelaria-admin' } } }
+)
+const ADMIN_PW='Admin@2024'
+let loginAttempts=0,lockUntil=0,adminHash=null,posts=[]
+
+// QUILL
+const quill=new Quill('#quill-editor',{
+  theme:'snow',
+  placeholder:'Napisz treść wpisu. Możesz formatować tekst, dodawać listy i wstawiać zdjęcia…',
+  modules:{toolbar:[
+    ['bold','italic','underline'],
+    [{'list':'ordered'},{'list':'bullet'}],
+    ['link','image'],
+    ['clean']
+  ]}
+})
+
+// image handler — base64
+const toolbar=quill.getModule('toolbar')
+toolbar.addHandler('image',()=>{
+  const input=document.createElement('input')
+  input.setAttribute('type','file')
+  input.setAttribute('accept','image/*')
+  input.click()
+  input.onchange=()=>{
+    const file=input.files[0]
+    if(!file)return
+    const reader=new FileReader()
+    reader.onload=e=>{
+      const range=quill.getSelection(true)
+      quill.insertEmbed(range.index,'image',e.target.result)
+      quill.setSelection(range.index+1)
+    }
+    reader.readAsDataURL(file)
+  }
+})
+
+// FILE ZONE
+document.getElementById('new-file').addEventListener('change',function(){
+  document.getElementById('file-name-display').textContent=this.files[0]?.name||''
+})
+
+// UTILS
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtDate(iso){return new Date(iso).toLocaleDateString('pl-PL',{day:'numeric',month:'long',year:'numeric'})}
+function fmtFull(iso){return new Date(iso).toLocaleString('pl-PL',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function isExp(p){return p.expires_at&&new Date(p.expires_at)<new Date()}
+
+async function sha256(t){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t))
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')
+}
+
+
+
+// LOGIN
+async function doLogin(){
+  const now=Date.now()
+  const errEl=document.getElementById('login-err')
+  const errTxt=document.getElementById('login-err-text')
+  if(now<lockUntil){errTxt.textContent=`Zablokowano na ${Math.ceil((lockUntil-now)/1000)}s.`;errEl.style.display='flex';return}
+  const pw=document.getElementById('pw').value
+  if(!pw)return
+  const hash=await sha256(pw)
+  if(hash===adminHash){
+    loginAttempts=0
+    document.getElementById('login-wrap').style.display='none'
+    document.getElementById('app').style.display='block'
+    loadPosts()
+  }else{
+    loginAttempts++
+    document.getElementById('pw').value=''
+    if(loginAttempts>=5){lockUntil=Date.now()+60000;loginAttempts=0;errTxt.textContent='Zablokowano na 60s. Zbyt wiele prób.'}
+    else{errTxt.textContent=`Nieprawidłowe hasło. Pozostało prób: ${5-loginAttempts}`}
+    errEl.style.display='flex'
+    document.getElementById('attempts-msg').textContent=`Próba ${loginAttempts} z 5`
+  }
+}
+
+document.getElementById('login-btn').onclick=doLogin
+document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()})
+document.getElementById('logout-btn').onclick=()=>location.reload()
+
+// LOAD POSTS
+async function loadPosts(){
+  const listEl=document.getElementById('posts-list')
+  try{
+    const {data,error:err}=await _sb.from('posts').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
+    if(err)throw new Error(err.message)
+    posts=data
+    document.getElementById('posts-count').textContent=`(${posts.length})`
+    renderPosts()
+  }catch(e){
+    listEl.innerHTML=`<div class="notice notice-err"><span class="notice-icon">⚠</span>Błąd ładowania: ${esc(e.message)}</div>`
+  }
+}
+
+function renderPosts(){
+  const listEl=document.getElementById('posts-list')
+  if(!posts.length){listEl.innerHTML='<div class="empty">Brak wpisów. Dodaj pierwszy powyżej.</div>';return}
+  listEl.innerHTML=posts.map((p,i)=>`
+    <div class="post-item ${isExp(p)?'expired':''}">
+      <div class="pi-top">
+        <div>
+          <div class="pi-title">${esc(p.title)}</div>
+          <div class="pi-badges">
+            ${isExp(p)?'<span class="badge badge-exp">Wygasły</span>':'<span class="badge badge-ok">Aktywny</span>'}
+            ${p.expires_at&&!isExp(p)?`<span class="badge badge-expiry">Ważne do ${esc(fmtFull(p.expires_at))}</span>`:''}
+          </div>
+          <div class="pi-meta">Dodano: ${esc(fmtDate(p.created_at))}</div>
+        </div>
+        <div class="reorder-col">
+          <button class="ord-btn" data-up="${p.id}" ${i===0?'disabled':''} title="Wyżej">▲</button>
+          <button class="ord-btn" data-down="${p.id}" ${i===posts.length-1?'disabled':''} title="Niżej">▼</button>
+        </div>
+      </div>
+      <div class="pi-preview">${p.content?p.content.replace(/<[^>]+>/g,' ').substring(0,140)+'…':''}</div>
+      <div class="pi-footer">
+        <label>Ważność:</label>
+        <input type="datetime-local" class="pi-expiry" data-id="${p.id}" value="${p.expires_at?p.expires_at.slice(0,16):''}">
+        <button class="btn btn-sm" data-save="${p.id}">Zapisz</button>
+        <div class="pi-spacer"></div>
+        <button class="btn btn-sm btn-danger" data-del="${p.id}">Usuń wpis</button>
+      </div>
+    </div>`).join('')
+
+  listEl.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Usunąć ten wpis?'))return
+    try{const{error}=await _sb.from('posts').delete().eq('id',b.dataset.del);if(error)throw error;showMsg('Wpis usunięty.','ok');await loadPosts()}
+    catch(e){showMsg('Błąd: '+e.message,'err')}
+  })
+  listEl.querySelectorAll('[data-save]').forEach(b=>b.onclick=async()=>{
+    const v=listEl.querySelector(`.pi-expiry[data-id="${b.dataset.save}"]`).value
+    try{const{error}=await _sb.from('posts').update({expires_at:v?new Date(v).toISOString():null}).eq('id',b.dataset.save);if(error)throw error;showMsg('Data ważności zaktualizowana.','ok');await loadPosts()}
+    catch(e){showMsg('Błąd: '+e.message,'err')}
+  })
+  listEl.querySelectorAll('[data-up]').forEach(b=>b.onclick=async()=>{
+    const idx=posts.findIndex(p=>p.id===b.dataset.up)
+    if(idx>0)await swap(idx,idx-1)
+  })
+  listEl.querySelectorAll('[data-down]').forEach(b=>b.onclick=async()=>{
+    const idx=posts.findIndex(p=>p.id===b.dataset.down)
+    if(idx<posts.length-1)await swap(idx,idx+1)
+  })
+}
+
+async function swap(i,j){
+  const a=posts[i],b=posts[j]
+  try{
+    const {error:e1}=await _sb.from('posts').update({sort_order:b.sort_order}).eq('id',a.id)
+    const {error:e2}=await _sb.from('posts').update({sort_order:a.sort_order}).eq('id',b.id)
+    if(e1||e2)throw e1||e2
+    await loadPosts()
+  }catch(e){showMsg('Błąd kolejności: '+e.message,'err')}
+}
+
+// ADD POST
+document.getElementById('add-btn').onclick=async()=>{
+  const title=document.getElementById('new-title').value.trim()
+  const content=quill.root.innerHTML
+  const isBlank=quill.getText().trim().length===0
+  const fi=document.getElementById('new-file')
+  const expiry=document.getElementById('new-expiry').value
+  const errEl=document.getElementById('add-err')
+  const errTxt=document.getElementById('add-err-text')
+  const okEl=document.getElementById('add-ok')
+  const okTxt=document.getElementById('add-ok-text')
+  const btn=document.getElementById('add-btn')
+  errEl.style.display='none';okEl.style.display='none'
+
+  if(!title||isBlank){errTxt.textContent='Uzupełnij tytuł i treść.';errEl.style.display='flex';return}
+
+  let image_base64=null,file_type=null,file_name=null
+  if(fi.files.length>0){
+    const f=fi.files[0];file_type=f.type;file_name=f.name
+    image_base64=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f)})
+  }
+
+  const maxOrder=posts.length?Math.max(...posts.map(p=>p.sort_order))+1:0
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Zapisywanie…'
+
+  try{
+    const video_url=document.getElementById('new-video').value.trim()||null
+    const{error:addErr}=await _sb.from('posts').insert({
+      title,content,image_base64,file_type,file_name,
+      expires_at:expiry?new Date(expiry).toISOString():null,
+      sort_order:maxOrder,
+      video_url
+    })
+    if(addErr)throw addErr
+    document.getElementById('new-title').value=''
+    quill.setContents([])
+    fi.value=''
+    document.getElementById('file-name-display').textContent=''
+    document.getElementById('new-expiry').value=''
+    document.getElementById('new-video').value=''
+    okTxt.textContent='Wpis opublikowany i widoczny na stronie.'
+    okEl.style.display='flex'
+    await loadPosts()
+  }catch(e){errTxt.textContent='Błąd: '+e.message;errEl.style.display='flex'}
+  finally{btn.disabled=false;btn.innerHTML='<span>✦</span> Opublikuj wpis'}
+}
+
+document.getElementById('refresh-btn').onclick=loadPosts
+
+function showMsg(msg,type){
+  const el=document.getElementById('global-msg')
+  el.innerHTML=`<div class="notice notice-${type}" style="margin-bottom:.75rem"><span class="notice-icon">${type==='ok'?'✓':'⚠'}</span>${esc(msg)}</div>`
+  setTimeout(()=>{el.innerHTML=''},4000)
+}
+
+async function init(){adminHash=await sha256(ADMIN_PW)}
+init()
+</script>
+</body>
+</html>

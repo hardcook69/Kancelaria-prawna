@@ -1,0 +1,18 @@
+# Netlify — konfiguracja panelu admina
+# Hasło Basic Auth zmień przed wdrożeniem na produkcję!
+
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Basic-Auth = "admin:KancelariaAdmin2025"
+
+# Wymuszamy HTTPS
+[[redirects]]
+  from = "http://kancelaria-admin.netlify.app/*"
+  to = "https://kancelaria-admin.netlify.app/:splat"
+  status = 301
+  force = true
