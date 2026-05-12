@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kancelariaprawna",
+  "compatibility_date": "2026-05-12",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "panel-admina-v9"
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}
